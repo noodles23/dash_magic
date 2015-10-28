@@ -23,6 +23,7 @@ function makeGraphs(error, apiData) {
 	var weekNum = ndx.dimension(function(d) { return d.week; });
 	var prodCategory = ndx.dimension(function(d) { return d.prod_category; });
 	var genderStatus = ndx.dimension(function(d) { return d.gender; });
+	var custSource = ndx.dimension(function(d) { return d.customer_source; });
 	var custStatus = ndx.dimension(function(d) { return d.cust_new_or_return; });
 	var custState = ndx.dimension(function(d) { return d.customer_state; });
 
@@ -30,6 +31,7 @@ function makeGraphs(error, apiData) {
 	var salespriceByWeek=weekNum.group().reduceSum(dc.pluck('sales_price'));
 	var salespriceByCat=prodCategory.group().reduceSum(dc.pluck('sales_price'));
 	var salespriceByGender=genderStatus.group().reduceSum(dc.pluck('sales_price'));
+	var salespriceByCustSource=custSource.group().reduceSum(dc.pluck('sales_price'));
 
 	var salescountByState=custState.group().reduceSum(dc.pluck('sales_count'));
 
@@ -56,6 +58,7 @@ console.log(maxDate);
 	var newcustChart = dc.lineChart("#newcust-chart");
 	var resourceTypeChart = dc.rowChart("#resource-chart");
 	var genderSalesChart = dc.pieChart("#gender-chart");
+	var custSourcePie = dc.pieChart("#csourcePie-chart");
 	var stateCountChart = dc.barChart("#statecount-chart");
 
 	// var resourceTypeChart = dc.dataTable("#resource-chart");
@@ -87,7 +90,7 @@ console.log(maxDate);
 		.margins({top: 10, right: 50, bottom: 30, left: 50})
 		.dimension(weekNum)
 		// .group(projectsByDate)
-		.group(salespriceByWeek,"$Sales")
+		.group(salespriceByWeek,"Weekly Sales ($)")
 		.renderArea(true)
 		.transitionDuration(500)
 		.x(d3.time.scale().domain([1, 52]))
@@ -106,8 +109,8 @@ console.log(maxDate);
 		.margins({top: 10, right: 50, bottom: 30, left: 50})
 		.dimension(weekNum)
 		// .group(projectsByDate)
-		.group(custNew,'New Customers')
-		.stack(custReturn, 'Returning Customers')
+		.group(custReturn, 'Returning Customers')
+		.stack(custNew,'New Customers')
 		.renderArea(true)
 		.transitionDuration(500)
 		.x(d3.time.scale().domain([1, 52]))
@@ -145,6 +148,16 @@ console.log(maxDate);
             .dimension(genderStatus)
             .ordinalColors(["#56B2EA","#E064CD","#F8B700","#78CC00","#7B71C5"])
             .group(salespriceByGender);
+
+    custSourcePie
+            .height(300)
+            //.width(350)
+            .radius(140)
+            .innerRadius(20)
+            .transitionDuration(1000)
+            .dimension(custSource)
+            .ordinalColors(["#56B2EA","#E064CD","#F8B700","#78CC00","#7B71C5"])
+            .group(salespriceByCustSource);
 
     stateCountChart
     	//.width(800)
